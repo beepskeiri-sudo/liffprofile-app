@@ -176,9 +176,6 @@ try {
     mail:
       document.getElementById("mail").value
   };
-
-// 2. 送信直前のデータ確認
-alert("送信データ: " + JSON.stringify(payload));
  
   const response =
     await fetch(GAS_URL, {
@@ -191,7 +188,7 @@ alert("送信データ: " + JSON.stringify(payload));
     });
 
 // 3. レスポンス受信の確認 
-alert("GASから応答がありました。ステータス: " + response.status);  
+//alert("GASから応答がありました。ステータス: " + response.status);  
   const result =
     await response.json();
 
