@@ -1,35 +1,206 @@
 <!DOCTYPE html>
-
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
 <title>登録内容変更</title>
+
+<script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+
+<style>
+body{
+  font-family:sans-serif;
+  max-width:600px;
+  margin:auto;
+  padding:20px;
+}
+
+h2{
+  text-align:center;
+}
+
+label{
+  display:block;
+  margin-top:12px;
+  font-weight:bold;
+}
+
+input{
+  width:100%;
+  box-sizing:border-box;
+  padding:8px;
+}
+
+button{
+  width:100%;
+  margin-top:20px;
+  padding:12px;
+  font-size:16px;
+}
+</style>
 </head>
+
 <body>
 
 <h2>登録内容変更</h2>
 
-<p>LIFFページ接続テスト</p>
+<label>氏名</label>
+<input id="name">
 
-<script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+<label>フリガナ</label>
+<input id="kana">
+
+<label>電話番号</label>
+<input id="tel">
+
+<label>生年月日</label>
+<input id="birth">
+
+<label>銀行名</label>
+<input id="bank">
+
+<label>支店名</label>
+<input id="branch">
+
+<label>口座番号</label>
+<input id="account">
+
+<label>口座名義</label>
+<input id="holder">
+
+<label>メールアドレス</label>
+<input id="mail">
+
+<button onclick="updateProfile()">
+更新する
+</button>
 
 <script>
-async function main(){
+
+const GAS_URL =
+"https://script.google.com/macros/s/AKfycbwu5c0Z4OMXyWuUDVlJRi5h6AyjPHVodw2Mg0fCyTTys-MvgKv9mh6lx1w5py_4UnVR/exec";
+
+let userId = "";
+
+async function init() {
 
   await liff.init({
-    liffId: "2009820268-pIw2BVGL"
+    liffId:"2009820268-pIw2BVGL"
   });
 
-  const profile = await liff.getProfile();
+  const profile =
+    await liff.getProfile();
 
-  document.body.innerHTML +=
-    "<p>LINE名：" +
-    profile.displayName +
-    "</p>";
+  userId = profile.userId;
+
+  const response =
+    await fetch(
+      `${GAS_URL}?action=getProfile&userId=${userId}`
+    );
+
+  const data =
+    await response.json();
+
+  if(data.result !== "ok"){
+    alert("登録情報が見つかりません");
+    return;
+  }
+
+  document.getElementById("name").value =
+    data.name || "";
+
+  document.getElementById("kana").value =
+    data.kana || "";
+
+  document.getElementById("tel").value =
+    data.tel || "";
+
+  document.getElementById("birth").value =
+    data.birth || "";
+
+  document.getElementById("bank").value =
+    data.bank || "";
+
+  document.getElementById("branch").value =
+    data.branch || "";
+
+  document.getElementById("account").value =
+    data.account || "";
+
+  document.getElementById("holder").value =
+    data.holder || "";
+
+  document.getElementById("mail").value =
+    data.mail || "";
 }
 
-main();
+async function updateProfile() {
+
+  const payload = {
+
+    action:"updateProfile",
+
+    userId:userId,
+
+    name:
+      document.getElementById("name").value,
+
+    kana:
+      document.getElementById("kana").value,
+
+    tel:
+      document.getElementById("tel").value,
+
+    birth:
+      document.getElementById("birth").value,
+
+    bank:
+      document.getElementById("bank").value,
+
+    branch:
+      document.getElementById("branch").value,
+
+    account:
+      document.getElementById("account").value,
+
+    holder:
+      document.getElementById("holder").value,
+
+    mail:
+      document.getElementById("mail").value
+  };
+
+  const response =
+    await fetch(GAS_URL, {
+      method:"POST",
+      headers:{
+        "Content-Type":"application/json"
+      },
+      body:JSON.stringify(payload)
+    });
+
+  const result =
+    await response.json();
+
+  if(result.result === "ok"){
+
+    alert("更新しました");
+
+    liff.closeWindow();
+
+  } else if(result.result === "nochange") {
+
+    alert("変更された項目がありません");
+
+  } else {
+
+    alert("更新できませんでした");
+  }
+}
+
+init();
+
 </script>
 
 </body>
