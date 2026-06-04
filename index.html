@@ -84,7 +84,7 @@ const GAS_URL =
 let userId = "";
 
 async function init() {
-
+try {
   await liff.init({
     liffId:"2009820268-pIw2BVGL"
   });
@@ -133,9 +133,16 @@ async function init() {
   document.getElementById("mail").value =
     data.mail || "";
 }
+catch (err) {
+    alert("初期化エラー: " + err.message);
+  }
+}
 
 async function updateProfile() {
+// 1. ボタンが押されたこと自体の確認
+alert("更新ボタンが押されました。送信を開始します...");  
 
+try {  
   const payload = {
 
     action:"updateProfile",
@@ -170,15 +177,21 @@ async function updateProfile() {
       document.getElementById("mail").value
   };
 
+// 2. 送信直前のデータ確認
+alert("送信データ: " + JSON.stringify(payload));
+ 
   const response =
     await fetch(GAS_URL, {
       method:"POST",
+      mode: "cors", // CORSを明示
       headers:{
-        "Content-Type":"application/json"
+        "Content-Type":"text/plain" // application/json から変更（GASのCORS回避の定番手法）
       },
       body:JSON.stringify(payload)
     });
 
+// 3. レスポンス受信の確認 
+alert("GASから応答がありました。ステータス: " + response.status);  
   const result =
     await response.json();
 
@@ -194,7 +207,11 @@ async function updateProfile() {
 
   } else {
 
-    alert("更新できませんでした");
+    alert("更新できませんでした")+ JSON.stringify(result));
+  }
+} catch (error) {
+    // 4. エラーが起きたらポップアップで強制表示
+    alert("通信エラー発生（詳細）: " + error.message);
   }
 }
 
