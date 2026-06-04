@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>登録内容変更</title>
+</head>
+<body>
+
+<h2>登録内容変更</h2>
+
+<p>LIFFページ接続テスト</p>
+
+<script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+
+<script>
+async function main(){
+
+  await liff.init({
+    liffId: "2009820268-pIw2BVGL"
+  });
+
+  const profile = await liff.getProfile();
+
+  document.body.innerHTML +=
+    "<p>LINE名：" +
+    profile.displayName +
+    "</p>";
+}
+
+main();
+</script>
+
+</body>
+</html>
