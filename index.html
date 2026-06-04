@@ -94,12 +94,9 @@ async function init() {
 
   userId = profile.userId;
 
-  const response =
-    await fetch(
-      (GAS_URL, {
-       method: "POST",
-       body: JSON.stringify(payload)
-      });
+  const response = await fetch(
+  `${GAS_URL}?action=getProfile&userId=${userId}`
+);
 
   const data =
     await response.json();
