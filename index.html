@@ -38,10 +38,49 @@ button{
   padding:12px;
   font-size:16px;
 }
+/* --- 追加：送信中メッセージ（画面オーバーレイ）のスタイル --- */
+#loadingOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.6); /* 画面を少し暗くする */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999; /* 一番手前に表示 */
+}
+
+/* 非表示にするためのクラス */
+.hidden {
+  display: none !important;
+}
+
+/* 文字の点滅アニメーション設定 */
+.blinking-text {
+  color: white;
+  font-size: 18px;
+  font-weight: bold;
+  animation: blink 1.2s infinite ease-in-out;
+  text-align: center;
+}
+
+@keyframes blink {
+  0% { opacity: 0.2; }
+  50% { opacity: 1.0; }
+  100% { opacity: 0.2; }
+}
+
 </style>
 </head>
 
 <body>
+
+<!-- 追加：送信中に表示するボタンなしのメッセージウインドウ -->
+<div id="loadingOverlay" class="hidden">
+  <div class="blinking-text">送信を開始します...<br>処理が終わるまでお待ちください。</div>
+</div>
 
 <h2>登録内容変更</h2>
 
@@ -93,11 +132,18 @@ try {
     await liff.getProfile();
 
   userId = profile.userId;
-
+ 
+ // 1. GASへの通信（非同期処理）を先に開始する（awaitをつけない）
   const response = await fetch(
   `${GAS_URL}?action=getProfile&userId=${userId}`
 );
-
+ 
+  // 2. 通信の裏でメッセージウインドウを表示し、ユーザーの「OK」待ちにする
+   alert("登録情報を表示します。\n変更したい項目のみ表示内容を変更してください。変更しない項目はそのままで入力しないでください。");
+  
+  // 3. ユーザーが「OK」を押した後、通信結果を待つ（すでに終わっていれば即座に進む）
+  const response = await responsePromise;
+  
   const data =
     await response.json();
 
@@ -138,9 +184,11 @@ catch (err) {
   }
 }
 
+// 変更：updateProfile関数
 async function updateProfile() {
-// 1. ボタンが押されたこと自体の確認
-alert("更新ボタンが押されました。送信を開始します...");  
+//1. ボタンなしの点滅更新メッセージを表示（隠していたoverlayを表示）
+  const overlay = document.getElementById("loadingOverlay");
+  overlay.classList.remove("hidden");
 
 try {  
   const payload = {
@@ -187,27 +235,29 @@ try {
       body:JSON.stringify(payload)
     });
 
-// 3. レスポンス受信の確認 
-//alert("GASから応答がありました。ステータス: " + response.status);  
   const result =
     await response.json();
-
+ // 2. 処理が終わったので点滅メッセージを非表示に戻す
+    overlay.classList.add("hidden");
+ 
+ // 3. 結果に応じてメッセージを表示
   if(result.result === "ok"){
 
-    alert("変更内容を更新しました");
+    alert("変更内容の更新が終了しました");  // 更新終了メッセージ
 
     liff.closeWindow();
 
   } else if(result.result === "nochange") {
 
-    alert("変更された項目がありません");
+    alert("変更された項目がありませんでした");
 
   } else {
 
     alert("更新できませんでした: " + JSON.stringify(result));
   }
 } catch (error) {
-    // 4. エラーが起きたらポップアップで強制表示
+    // エラーが起きた場合もメッセージを確実に消す
+    overlay.classList.add("hidden");  
     alert("通信エラー発生（詳細）: " + error.message);
   }
 }
