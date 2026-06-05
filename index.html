@@ -134,7 +134,7 @@ try {
   userId = profile.userId;
  
  // 1. GASへの通信（非同期処理）を先に開始する（awaitをつけない）
-  const response = await fetch(
+  const responsePromise = fetch(
   `${GAS_URL}?action=getProfile&userId=${userId}`
 );
  
