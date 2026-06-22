@@ -52,6 +52,36 @@ button{
   z-index: 9999; /* 一番手前に表示 */
 }
 
+<!-- 初回説明モーダル -->
+<div id="infoModal" class="hidden">
+  <div class="modal-box">
+
+    <span id="closeModal" class="close-btn">
+      ×
+    </span>
+    
+    <div class="modal-title">
+      登録内容変更について
+    </div>
+
+    <div class="modal-text">
+      ご登録内容を表示いたします。<br><br>
+
+      修正を希望される項目のみ、
+      内容を書き換えてください。<br><br>
+
+      変更のない項目につきましては、
+      表示されているデータを
+      そのまま残してください。
+    </div>
+
+    <button id="infoOkBtn">
+      確認しました
+    </button>
+
+  </div>
+</div>
+
 /* 非表示にするためのクラス */
 .hidden {
   display: none !important;
@@ -71,7 +101,85 @@ button{
   50% { opacity: 1.0; }
   100% { opacity: 0.2; }
 }
+ 
+/* 初回説明モーダル */
 
+#infoModal{
+  position:fixed;
+  top:0;
+  left:0;
+  width:100%;
+  height:100%;
+
+  background:rgba(0,0,0,0.6);
+
+  display:flex;
+  justify-content:center;
+  align-items:center;
+
+  z-index:10000;
+}
+
+.modal-box{
+  position:relative;
+  background:#fff;
+  width:90%;
+  max-width:500px;
+
+  padding:25px;
+  border-radius:16px;
+
+  text-align:center;
+  box-sizing:border-box;
+  box-shadow:0 4px 20px rgba(0,0,0,0.2);
+}
+
+.modal-title{
+  font-size:22px;
+  font-weight:bold;
+  color:#06C755;   /* LINEグリーン */
+  margin-bottom:20px;
+}
+
+.modal-text{
+  font-size:18px;
+  line-height:1.8;
+  color:#333;
+  margin-bottom:25px;
+}
+
+#infoOkBtn{
+  width:100%;
+  padding:14px;
+  font-size:18px;
+  background:#06C755; /* LINEグリーン */
+  color:white;
+  border:none;
+  border-radius:8px;
+  cursor:pointer;
+}
+#infoOkBtn:hover{
+  opacity:0.9;
+}
+
+.close-btn{
+  position:absolute;
+
+  top:10px;
+  right:15px;
+
+  font-size:28px;
+
+  color:#999;
+
+  cursor:pointer;
+
+  font-weight:bold;
+}
+
+.close-btn:hover{
+  color:#333;
+}
 </style>
 </head>
 
@@ -120,6 +228,37 @@ button{
 const GAS_URL =
 "https://script.google.com/macros/s/AKfycbypxG2AgXXfiE0Qhc-pcGTrAjEr2dq2KP3sn0Ir12unQg8lFB1UUumyf4611YNWxZRXLw/exec";
 
+function showInfoModal() {
+
+  return new Promise(resolve => {
+
+    const modal =
+      document.getElementById("infoModal");
+
+    const okBtn =
+      document.getElementById("infoOkBtn");
+
+    const closeBtn =
+      document.getElementById("closeModal");
+
+    modal.classList.remove("hidden");
+
+    const close = () => {
+
+      modal.classList.add("hidden");
+
+      resolve();
+
+    };
+
+    okBtn.onclick = close;
+
+    closeBtn.onclick = close;
+
+  });
+
+}
+  
 let userId = "";
 
 async function init() {
@@ -138,8 +277,11 @@ try {
   `${GAS_URL}?action=getProfile&userId=${userId}`
 );
  
-  // 2. 通信の裏でメッセージウインドウを表示し、ユーザーの「OK」待ちにする
-   alert("ご登録内容を表示いたします。\n修正を希望される項目のみ、内容を書き換えてください。変更のない項目につきましては、表示されているデータをそのまま残してください。");
+  // 2.モーダル表示
+   await showInfoModal();
+  
+  //alert外す 2. 通信の裏でメッセージウインドウを表示し、ユーザーの「OK」待ちにする
+  //alert("ご登録内容を表示いたします。\n修正を希望される項目のみ、内容を書き換えてください。変更のない項目につきましては、表示されているデータをそのまま残してください。");
   
   // 3. ユーザーが「OK」を押した後、通信結果を待つ（すでに終わっていれば即座に進む）
   const response = await responsePromise;
