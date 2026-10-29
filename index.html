@@ -337,12 +337,15 @@ async function updateProfile() {
   overlay.classList.remove("hidden");
 
 try {  
+  const lineDisplayName = (await liff.getProfile()).displayName;
   const payload = {
 
     action:"updateProfile",
 
     userId:userId,
-
+    
+    lineDisplayName:lineDisplayName,
+    
     name:
       document.getElementById("name").value,
 
